@@ -20,7 +20,7 @@ export class ProductFormComponent {
   private alertService = inject(AlertService);
 
   form: FormGroup;
-  id: number | null = null;
+  idProducto: number | null = null;
   fotoSeleccionada: File | null = null;
 
   constructor() {
@@ -34,7 +34,40 @@ export class ProductFormComponent {
 
 
   ngOnInit(): void {
-  throw new Error('Method not implemented.');
+  this.idProducto = Number(this.route.snapshot.paramMap.get('id'));
+  if (this.idProducto) {
+    this.productoService.getProductoById(this.idProducto).subscribe(p => {
+      this.form.patchValue(p)
+    })
   }
-
 }
+onFileSelected(event: any) {
+  this.fotoSeleccionada = event.target.files[0];
+}
+
+guardar() {
+  if (this.form.invalid) return;
+    const formData = new FormData();
+    formData.append('nombre', this.form.value.nombre);
+    formData.append('descripcion', this.form.value.descripcion);
+    formData.append('precio', this.form.value.precio);
+    formData.append('stock', this.form.value.stock);
+
+    if (this.fotoSeleccionada) {
+      formData.append('file', this.fotoSeleccionada);
+    }
+    const request = this.idProducto 
+    ? this.productoService.actualizarProducto(this.idProducto, formData) 
+    : this.productoService.crearProducto(formData)
+    request.subscribe({
+      next: () => {
+        this.alertService.success(this.idProducto ? 'Producto actualizado con éxito' : 'Producto creado con éxito');
+        this.router.navigate(['/productos']);
+      }, error: (err) => this.alertService.error('Error al guardar el producto')
+      
+    });
+
+  }
+}
+
+

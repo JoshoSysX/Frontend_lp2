@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Producto } from '../interfaces/producto.interface';
 
 @Injectable({
@@ -13,7 +13,12 @@ export class ProductoService {
   
   //Listar ruta publica
   getProductos():Observable<Producto[]>{
-    return this.http.get<Producto[]>(this.apiUrl);
+
+    return this.http.get<Producto[]>(this.apiUrl).pipe(
+      tap(productos => {
+        console.log('Productos obtenidos:', productos);
+      })
+    );
   }
   
   //Obtener por Id
